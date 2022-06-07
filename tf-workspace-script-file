@@ -1,0 +1,91 @@
+pipeline {
+  agent any
+  parameters {
+    choice(
+      name: 'Env',
+      choices: ['Dev_Create', 'QA_Create','Staging_Create','Dev_Destroy', 'QA_Destroy','Staging_Destroy'],
+      description: 'Passing the Environment'
+    )
+  }
+
+  stages {
+      stage('GIT_Clone') {
+        steps {
+        checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/CodvaTech-Labs/terraform-course.git']]]
+           }
+        }
+        stage('Terraform_Setup') {
+            steps {
+                script {
+                    if (params.Env == "Dev_Create") {
+                       sh '''
+                       echo "terraform create is in progress"
+                       cd terraform_workspace-demo
+                       ls
+                       terraform init -input=false
+                       terraform workspace select dev
+                       terraform apply --auto-approve -input=false
+                       '''      
+                    } 
+                    
+                    if (params.Env == "QA_Create") {
+                       sh '''
+                       echo "terraform create is in progress"
+                       cd terraform_workspace-demo
+                       ls
+                       terraform init -input=false
+                       terraform workspace select qa
+                       terraform apply --auto-approve -input=false
+                       '''      
+                    } 
+                    
+                    if (params.Env == "Staging_Create") {
+                       sh '''
+                       echo "terraform create is in progress"
+                       cd terraform_workspace-demo
+                       ls
+                       terraform init -input=false
+                       terraform workspace select staging
+                       terraform apply --auto-approve -input=false
+                       '''      
+                    } 
+
+                    if (params.Env == "Dev_Destroy") {
+                       sh '''
+                       echo "terraform dev destroy is in progress"
+                       cd terraform_workspace-demo
+                       ls
+                       terraform init -input=false
+                       terraform workspace select dev
+                       terraform destroy --auto-approve -input=false
+                       '''      
+                    } 
+                    
+                    if (params.Env == "QA_Destroy") {
+                       sh '''
+                       echo "terraform destroy QA is in progress"
+                       cd terraform_workspace-demo
+                       ls
+                       terraform init -input=false
+                       terraform workspace select qa
+                       terraform destroy --auto-approve -input=false
+                       '''      
+                    } 
+                    
+                    if (params.Env == "Staging_Destroy") {
+                       sh '''
+                       echo "terraform create is in progress"
+                       cd terraform_workspace-demo
+                       ls
+                       terraform init -input=false
+                       terraform workspace select staging
+                       terraform destroy --auto-approve -input=false
+                       '''      
+                    } 
+                    
+                }
+            }
+        }
+    
+  }
+}
